@@ -479,11 +479,6 @@ impl EthereumAdapter {
 
         // Ganache does not support calls by block hash.
         // See https://github.com/trufflesuite/ganache-cli/issues/973
-        let block_id = if !self.supports_eip_1898 {
-            BlockId::Number(block_ptr.number.into())
-        } else {
-            BlockId::Hash(block_ptr.hash_as_h256())
-        };
         let retry_log_message = format!("eth_call RPC call for block {}", block_ptr);
         retry(retry_log_message, &logger)
             .when(|result| match result {
@@ -505,7 +500,7 @@ impl EthereumAdapter {
                         value: None,
                         data: Some(call_data.clone()),
                     };
-                    let result = web3.eth().call(req, Some(block_id)).boxed().await;
+                    let result = web3.eth().call(req, Some(Web3BlockNumber::Latest.into())).boxed().await;
 
                     // Try to check if the call was reverted. The JSON-RPC response for reverts is
                     // not standardized, so we have ad-hoc checks for each Ethereum client                    // Ganache.
